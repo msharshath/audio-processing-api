@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for character set and viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS from CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Custom CSS inline -->
+    <style>
+        body {
+            background: #ff9492;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #007bff; /* Bootstrap primary color */
+        }
+
+        form {
+            margin: 10px auto;
+            max-width: 400px;
+        }
+
+        /* Add a bit more styling to buttons */
+        button {
+            margin-top: 10px;
+        }
+
+        /* Style for the response div */
+        #response {
+            margin-top: 20px;
+            font-weight: bold;
+            color: black; /* Bootstrap success color */
+        }
+
+        /* Style for the logo */
+        #logo {
+            position: absolute; /* Position the logo absolutely within the body */
+            top: 10px; /* Set the top distance from the top of the body */
+            left: 10px; /* Set the left distance from the left of the body */
+            max-width: 80px; /* Set the maximum width of the logo */
+        }
+    </style>
+
+    <!-- Title of the page -->
+    <title>Audio Processing App</title>
+</head>
+
+<body class="container mt-3">
+
+    <!--logo-->
+    <img id="logo" src="https://assets-global.website-files.com/64f605bdfa749671fed117a9/64f7af5a210fd2ed760ef96a_AI-Coustics.png" alt="Logo">
+
+    <!-- Bootstrap Jumbotron for a prominent heading -->
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Audio Processing App</h1>
+    </div>
+
+    <!-- Form for user login -->
+    <div id="loginSection">
+        
+        <form class="mb-3" id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="login()">Login</button>
+        </form>
+    </div>
+
+
+    <!-- Form for API key submission -->
+    <div id="apiKeySection" style="display:none;">
+        <form class="mb-3" id="apiKeyForm">
+            <div class="form-group">
+                <label for="apiKey">API Key:</label>
+                <input type="text" class="form-control" id="apiKey" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="authenticate()">Submit</button>
+        </form>
+    </div>    
+
+    <div id="contentSection" style="display:none;">
+
+        <form class="mb-3" id="uploadForm"> <!-- Form for uploading audio files -->
+            <div class="form-group">
+                <label for="audioFile">Upload Audio File:</label>
+                <input type="file" class="form-control" id="audioFile" accept=".wav, .mp3" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="AudioUpload()">Upload</button>
+        </form>
+
+        <form class="mb-3" id="adjustVolumeForm"> <!-- Form for adjusting audio volume -->
+            <div class="form-group">
+                <label for="volumeLevel">Adjust Volume (dBFS):</label>
+                <input type="number" class="form-control" id="volumeLevel" required>
+                <button type="button" class="btn btn-danger" onclick="AdjustVolume('increase')">Increase</button>
+                <button type="button" class="btn btn-dark" onclick="AdjustVolume('decrease')">Decrease</button>
+            </div>
+        </form>
+
+        <!-- Button for downloading audio -->
+        <button class="btn btn-success mb-3" onclick="AudioDownload()">Download Audio</button>
+    </div>
+    
+    <!-- Logout button -->
+    <button id="logoutButton" class="btn btn-outline-dark float-right" style="display:none;" onclick="logout()">Logout</button>
+
+    <!-- Container for displaying responses or messages -->
+    <div id="response"></div>
+
+    <!-- Bootstrap and other required JavaScript libraries from CDNs -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXhZ8Af8fd2GOi8m5VWqMSqP9T/aIq5JSdG" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+    <!-- JavaScript inline Starts from here-->
+    <script>
+
+
+       // Function to handle the initial login
+        function login() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            // Send login credentials to the backend for authentication
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: username, password: password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('apiKey').value = '';
+                    // Hide the login and API key input sections after successful login
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('apiKeySection').style.display = 'block';// Show content section
+                    document.getElementById('contentSection').style.display = 'none'; 
+                    document.getElementById('logoutButton').style.display = 'block';
+
+                    // Check if an API key is provided in the response
+                    if (data.apiKey) {
+                        // Display the API key message
+                        //alert(data.message);
+                        document.getElementById('response').innerHTML = data.message;
+
+                        // Call authenticate function with the username
+                        //authenticate(username);
+                    } else {
+                        // Display a general success message
+                        document.getElementById('response').innerHTML = data.message;
+                    }
+                } else {
+                    // Display an error message for unsuccessful login
+                    alert('Invalid username, or password. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during login:', error);
+                alert('An error occurred during login. Please try again.');
+            });
+        }
+
+
+
+        // Function to handle user logout
+        function logout() {
+            // Reset the page to its initial state with the login section visible
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('apiKeySection').style.display = 'none';
+            document.getElementById('contentSection').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'none';
+
+            // Clear the username and password fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            
+
+            // Clear any response or message displayed
+            document.getElementById('response').innerHTML = '';
+        }
+
+
+        
+        // Function to handle both API key authentication
+        function authenticate() {
+            // Get the entered API key from the input field
+            var apiKey = document.getElementById('apiKey').value;
+            //var username = document.getElementById('username').value;
+
+            // Send a request to the backend for API key authentication
+            fetch('/authenticate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: 'admin', apiKey: apiKey }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Check if API key authentication is successful
+                if (data.success) {
+                    // If authentication is successful, proceed with the file upload
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('apiKeySection').style.display = 'none'; // Hide API key input
+                    document.getElementById('contentSection').style.display = 'block'; // Show upload section
+                    document.getElementById('logoutButton').style.display = 'block';
+                } else {
+                    // Display an error message for unsuccessful authentication
+                    document.getElementById('response').innerHTML = 'Invalid API key. Please try again.';
+                }
+            })
+            .catch(error => {
+                // Handle errors that may occur during the authentication process
+                console.error('Error during authentication:', error);
+                document.getElementById('response').innerHTML = 'An error occurred during authentication. Please try again.';
+            });
+        }
+
+
+
+
+        // Function to handle audio file upload
+        function AudioUpload() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('audioFile');
+
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        // Handle error case
+                        document.getElementById('response').innerHTML = 'Error uploading audio file: ' + data.error;
+                    } else {
+                        // Handle success case
+                        document.getElementById('response').innerHTML = data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading audio file:', error);
+                    document.getElementById('response').innerHTML = 'Error uploading audio file.';
+                });
+            } else {
+                document.getElementById('response').innerHTML = 'Please select an audio file.';
+            }
+        }
+
+
+
+
+
+        // Function to handle audio volume adjustment
+        function AdjustVolume(action) {
+            var volumeLevelInput = document.getElementById('volumeLevel');
+            var volumeLevel = parseFloat(volumeLevelInput.value);
+
+            if (!isNaN(volumeLevel)) {
+
+                // Adjust action based on user's choice (increase or decrease)
+                volumeLevel = (action === 'increase') ? volumeLevel : -volumeLevel;
+                
+                fetch('/adjust', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ volumeLevel: volumeLevel }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').innerHTML = data.message;
+                })
+                .catch(error => {
+                    console.error('Error adjusting audio:', error);
+                    document.getElementById('response').innerHTML = 'Error adjusting audio.';
+                });
+            } else {
+                document.getElementById('response').innerHTML = 'Please enter a valid volume level.';
+            }
+        }
+
+
+        
+        // Function to handle audio download
+        function AudioDownload() {
+            fetch('/download', {
+                method: 'GET',
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                // Create a temporary anchor element
+                var a = document.createElement('a');
+                var url = window.URL.createObjectURL(blob);
+
+                // Set the download attribute and trigger a click to download the file
+                a.href = url;
+                a.download = 'adjusted_audio.mp3';  // Change the file name as needed
+                document.body.appendChild(a);
+                a.click();
+
+                // Cleanup
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error downloading audio:', error);
+                document.getElementById('response').innerHTML = 'Error downloading audio.';
+            });
+        }
+        
+
+    </script>
+
+</body>
+</html>
+
