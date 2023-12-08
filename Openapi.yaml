@@ -1,0 +1,279 @@
+swagger: '2.0'
+info:
+  title: Audio Processing API
+  description: >
+    To use this as API documentation, Open website and copy & paste this code to console: 
+
+    - https://app.apiary.io/audioprocessingapi/editor 
+
+    - https://editor.swagger.io/
+
+    - https://editor-next.swagger.io/
+
+
+    The Audio Processing API provides a flexible and powerful solution for audio file manipulation,specializing in volume adjustment. It allows users to upload, adjust, and download audio fileseffortlessly. The API leverages the Flask framework and PyDub library to handle requests and performaudio processing tasks, ensuring a seamless and efficient user experience.
+
+    Key Features:
+
+    - User Authentication: Securely generate and manage API keys for user authentication.
+
+    - File Upload: Easily upload audio files in various formats for processing.
+
+    - Volume Adjustment: Dynamically adjust the volume of the latest uploaded audio file.
+
+    - Download: Retrieve the processed audio file with the desired volume level.
+
+
+    How it Works:
+
+    1. Authentication: Users can log in to obtain a unique API key for secure access.
+
+    2. File Upload: Upload audio files through the '/upload' endpoint using a user's API key.
+
+    3. Volume Adjustment: Adjust the volume of the latest uploaded audio via the '/adjust' endpoint.
+
+    4. Download: Retrieve the adjusted audio file using the '/download' endpoint.
+
+
+    This API is designed for simplicity and ease of integration, making it suitable for a wide range of audio
+    processing applications. Explore the provided endpoints to seamlessly incorporate audio processing into
+    your projects.
+  contact:
+    email: apiteam@swagger.io
+  version: '1.0'
+
+schemes:
+  - http
+  - https
+host: localhost:5000
+
+paths:
+  /login:
+    post:
+      summary: Authenticate User and Obtain API Key
+      description: >
+        This endpoint handles user authentication, allowing users to securely log in and obtain an API keyfor accessing protected resources. Users need to provide their username and password in the request body.
+
+
+        If authentication is successful, a unique API key is generated for the user.
+
+
+        `Note`: If the user already has an API key, the response will indicate the existing key, and a new one
+        will not be generated.
+
+      consumes:
+        - application/json
+      parameters:
+        - name: username
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+        - name: apiKey
+          in: header
+          type: string
+          required: false
+      responses:
+        '200':
+          description: Successful login
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              apiKey:
+                type: string
+        '401':
+          description: Unauthorized access, which defines the user details are not available.
+
+  /authenticate:
+    post:
+      summary: Authenticate user with API key
+      description: |
+        This endpoint is used to authenticate a user by verifying the provided API key. Users must include their username and API key in the request body. 
+        
+        A successful authentication will return a 200 status and connects to upload audio section, while an unauthorized attempt will result in a 401 status which defines of Enter a valid API key.
+
+        Ensure that users provide accurate and valid API keys generated during the login process to access protected resources within the Audio Processing API.
+      consumes:
+        - application/json
+      parameters:
+        - name: username
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              apiKey:
+                type: string
+      responses:
+        '200':
+          description: Successful authentication
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+        '401':
+          description: Unauthorized access, To enter a valid API key.
+
+
+  /upload:
+    post:
+      summary: Upload an audio file
+      description: |
+        This endpoint allows users to upload an audio file for processing. The request must be formatted as `multipart/form-data`, and the audio file should be included in the 'file' field.
+
+        Upon receiving the audio upload request, the server checks if the uploaded file is empty. If the file is empty, a 400 Bad Request response is returned with an error message. Otherwise, the server processes the audio file and responds with a 200 status and a message confirming the successful upload.
+
+        Ensure that the uploaded audio files comply with the supported formats and specifications for seamless processing by the Audio Processing API.
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: file
+          in: formData
+          type: file
+          required: true
+      responses:
+        '200':
+          description: Successful upload
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: File uploaded successfully
+        '400':
+          description: Bad Request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: No selected file or empty file
+
+
+
+  /adjust:
+    post:
+      summary: Adjust the volume of the latest uploaded audio file
+      description: |
+        This endpoint allows users to adjust the volume of the most recently uploaded audio file. 
+        Users should provide the desired volume level as a numeric value in the request body.
+        Once the value is entered, user should choose to increase or decrease buttons which does the action for the uploaded audio.
+        The adjusted audio will replace the original file in the server's in-memory storage.
+
+      consumes:
+        - application/json
+
+      parameters:
+        - name: volumeLevel
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              volumeLevel:
+                type: number
+          description: The desired volume level for audio adjustment.
+
+      responses:
+        '200':
+          description: Successful volume adjustment
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Audio adjusted successfully
+        '400':
+          description: Bad Request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Invalid volume level
+        '404':
+          description: Not Found
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Audio file not found
+
+
+  /download:
+    get:
+      summary: Download the adjusted audio file
+      description: |
+        This endpoint allows users to download the most recently adjusted audio file.
+        The server will respond with the adjusted audio file in the specified format.
+        Users can expect the file to be in the MP3 format by default.
+
+      produces:
+        - application/octet-stream
+
+      parameters:
+        - name: filename
+          in: query
+          description: The name of the file to download
+          required: true
+          type: string
+
+      responses:
+        '200':
+          description: Successful download
+          headers:
+            Content-Disposition:
+              type: string
+              description: Specifies the file name for download
+
+          # It indicates that the response body is of type string with a binary format
+          schema:
+            type: string
+            format: binary
+
+# Summary: Definition of API key security for authentication
+securityDefinitions:
+  apiKey:
+    type: apiKey
+    name: X-API-Key
+    in: header
+security:
+  - apiKey: []
+
+# Summary: Defines of a standard error response structure
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      invalidAPIKey:
+        type: string
+        example: "Invalid API key. Please provide a valid API key for authentication."
+
+      unauthorizedAccess:
+        type: string
+        example: "Unauthorized access. Please provide a valid API key."
+
+      fileNotFound:
+        type: string
+        example: "Audio file not found. Please make sure the file exists and try again."
+
+      invalidVolumeLevel:
+        type: string
+        example: "Invalid volume level. Please provide a numeric value for volume adjustment."
+
+      noSelectedFile:
+        type: string
+        example: "No selected file for upload. Please choose a file and try again."
