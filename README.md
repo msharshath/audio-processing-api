@@ -144,7 +144,7 @@ Open a web browser and go to **http://localhost:8080** to interact with the Audi
 
 1.	The audio-processing-app.git is cloned.
    
-Command: **git clone https://github.com/msharshath/audio-processing-app.git**
+Command: **git clone https://github.com/msharshath/audio-processing-api**
 
 2.	Open the Visual studio console of terminal to create a docker image.
    
