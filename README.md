@@ -31,7 +31,7 @@ The frontend harnesses the trio of HTML, CSS, JavaScript and Bootstrap to create
 
 1.	Clone repository:
 
-**git clone https://github.com/msharshath/audio-processing-api.git**
+**git clone https://github.com/msharshath/audio-processing-api**
 
 **cd audio-processing-app**
 
