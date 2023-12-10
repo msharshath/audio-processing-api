@@ -6,6 +6,10 @@ The primary goal is to develop an API to audio file processing, encapsulated wit
 
 A crucial security measure is implemented through an authentication system utilizing API keys, ensuring controlled and secure access to the API. Positioned as a user-facing solution, the API prioritizes simplicity and efficiency, allowing users to effortlessly upload audio files for processing, dynamically adjust volume levels, and download the resulting audio files. The containerization aspect contributes to the API's versatility, enabling easy deployment and making it adaptable for a variety of audio processing applications.
 
+
+![audio_api](https://github.com/msharshath/audio-processing-api/assets/32800505/7280b253-096c-4ae0-8c05-74506ffe2209)
+
+
 **Use:**
 
 This codebase serves as a versatile API tool, allowing users to elevate their audio files within a user-friendly digital environment. Whether the intent is to refine audio levels for enhanced clarity or seamlessly integrate audio processing into more diverse range of applications.
